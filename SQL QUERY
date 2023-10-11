@@ -1,0 +1,114 @@
+average price of homes for each grade level  ?
+-- SELECT grade, AVG(price) AS average_price
+FROM HOUSE_DATA
+GROUP BY grade
+ORDER BY grade;
+
+top 5 zip code with the highest total sales?
+-- SELECT zipcode, SUM(price) AS total_sales
+FROM HOUSE_DATA
+GROUP BY zipcode
+ORDER BY total_sales DESC
+limit 5; 
+
+top 5 zip code with the lowest total sales?
+--SELECT zipcode, SUM(price) AS total_sales
+FROM HOUSE_DATA
+GROUP BY zipcode
+ORDER BY total_sales 
+limit 5;
+
+ top 10 houses with the highest price per square foot?
+-- SELECT
+  grade,
+  price / sqft_living AS price_per_sqft,
+  price
+FROM
+  HOUSE_DATA
+ORDER BY
+  price_per_sqft DESC
+LIMIT 10;
+
+rank houses by their price per square foot within each zip code??
+-- WITH RankedHouses AS (
+    SELECT
+        id,
+        zipcode,
+        price,
+        sqft_living,
+        ROW_NUMBER() OVER (PARTITION BY zipcode ORDER BY price / sqft_living) AS PricePerSqftRank
+    FROM
+        HOUSE_DATA
+)
+SELECT
+    id,
+    zipcode,
+    price,
+    sqft_living,
+    PricePerSqftRank
+FROM
+    RankedHouses;
+
+the year-over-year percentage change in the home price for each zip code??
+-- WITH YearlyPrices AS (
+  SELECT
+    YEAR(date) AS year,
+    zipcode,
+    AVG(price) AS average_price
+  FROM
+    HOUSE_DATA
+  GROUP BY
+    year, zipcode
+),
+PriceChange AS (
+  SELECT
+    yp1.zipcode AS zipcode,
+    yp1.year AS year,
+    (yp1.average_price - yp2.average_price) / yp2.average_price * 100 AS price_change
+  FROM
+    YearlyPrices yp1
+  JOIN
+    YearlyPrices yp2
+  ON
+    yp1.zipcode = yp2.zipcode
+    AND yp1.year = yp2.year + 1
+)
+SELECT
+  pc.zipcode,
+  pc.year,
+  pc.price_change
+FROM
+  PriceChange pc
+ORDER BY
+  pc.zipcode, pc.year;
+
+
+average price for no of bedrooms?
+-- SELECT
+    bedrooms,
+    AVG(price) AS average_price
+FROM
+    HOUSE_DATA
+GROUP BY
+    bedrooms
+ORDER BY
+    bedrooms;
+
+total number of homes in each condition category ??
+-- SELECT
+    condition,
+    COUNT(*) AS total_homes
+FROM
+    HOUSE_DATA
+GROUP BY
+    condition;
+
+waterfront views on home prices?
+-- SELECT
+    waterfront,
+    AVG(price) AS average_price
+FROM
+    HOUSE_DATA
+GROUP BY
+    waterfront;
+
